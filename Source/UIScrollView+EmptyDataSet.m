@@ -702,7 +702,11 @@ Class dzn_baseClassToSwizzleForTarget(id target)
 // the tap gesture on the DZNEmptyDataSetView gets the touch first which isn't the desired behaviour. The tap gesture
 // should only get touch events if the view that was tapped is not a UIControl
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
-    return ![touch.view isKindOfClass:[UIControl class]];
+    if (gestureRecognizer == self.emptyDataSetView.tapGesture) {
+        return ![touch.view isKindOfClass:[UIControl class]];
+    }
+    
+    return YES;
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
@@ -710,23 +714,23 @@ Class dzn_baseClassToSwizzleForTarget(id target)
     if ([gestureRecognizer.view isEqual:self.emptyDataSetView]) {
         return [self dzn_isTouchAllowed];
     }
-    
+
     return [super gestureRecognizerShouldBegin:gestureRecognizer];
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
     UIGestureRecognizer *tapGesture = self.emptyDataSetView.tapGesture;
-    
+
     if ([gestureRecognizer isEqual:tapGesture] || [otherGestureRecognizer isEqual:tapGesture]) {
         return YES;
     }
-    
+
     // defer to emptyDataSetDelegate's implementation if available
     if ( (self.emptyDataSetDelegate != (id)self) && [self.emptyDataSetDelegate respondsToSelector:@selector(gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:)]) {
         return [(id)self.emptyDataSetDelegate gestureRecognizer:gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:otherGestureRecognizer];
     }
-    
+
     return NO;
 }
 
